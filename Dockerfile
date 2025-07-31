@@ -18,14 +18,15 @@ COPY index.html ./
 COPY vite.config.ts ./
 COPY tsconfig.json ./
 COPY tsconfig.node.json ./
-COPY tailwind.config.* ./
+COPY tailwind.config.cjs ./
+COPY tailwind.config.js ./
 COPY postcss.config.cjs ./
 COPY .eslintrc ./
 COPY .eslintignore ./
 COPY .prettierrc ./
 
-# Build the frontend
-RUN npm run build
+# Build the frontend with verbose output
+RUN npm run build --verbose
 
 # Clean up frontend node_modules to save space (keep only dist)
 RUN rm -rf node_modules package*.json src public index.html vite.config.ts tsconfig*.json tailwind.config.* postcss.config.cjs .eslintrc .eslintignore .prettierrc
