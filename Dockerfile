@@ -7,12 +7,29 @@ RUN apk add --no-cache ffmpeg
 # Set working directory
 WORKDIR /app
 
-# Copy server package files and install backend dependencies only
+# Copy frontend package files and install frontend dependencies
+COPY package*.json ./
+RUN npm install
+
+# Copy frontend source code
+COPY src/ ./src/
+COPY public/ ./public/
+COPY index.html ./
+COPY vite.config.ts ./
+COPY tsconfig.json ./
+COPY tsconfig.node.json ./
+COPY tailwind.config.* ./
+COPY postcss.config.cjs ./
+COPY .eslintrc ./
+COPY .eslintignore ./
+COPY .prettierrc ./
+
+# Build the frontend
+RUN npm run build
+
+# Copy server package files and install backend dependencies
 COPY server/package*.json ./server/
 RUN cd server && npm install --only=production
-
-# Copy pre-built frontend (dist folder)
-COPY dist/ ./dist/
 
 # Copy server source code
 COPY server/ ./server/
