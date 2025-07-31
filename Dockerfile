@@ -7,7 +7,7 @@ RUN apk add --no-cache ffmpeg
 # Set working directory
 WORKDIR /app
 
-# Copy frontend package files and install frontend dependencies
+# Copy frontend package files and install ALL dependencies (including dev deps for build)
 COPY package*.json ./
 RUN npm install
 
@@ -26,6 +26,9 @@ COPY .prettierrc ./
 
 # Build the frontend
 RUN npm run build
+
+# Clean up frontend node_modules to save space (keep only dist)
+RUN rm -rf node_modules package*.json src public index.html vite.config.ts tsconfig*.json tailwind.config.* postcss.config.cjs .eslintrc .eslintignore .prettierrc
 
 # Copy server package files and install backend dependencies
 COPY server/package*.json ./server/
