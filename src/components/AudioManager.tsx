@@ -8,7 +8,7 @@ import Constants from "../utils/Constants";
 import { Transcriber } from "../hooks/useTranscriber";
 import Progress from "./Progress";
 import AudioRecorder from "./AudioRecorder";
-import { YouTubeTile, YouTubeIcon } from "./YouTubeTile";
+import { YouTubeTile } from "./YouTubeTile";
 import { YouTubeExtractor } from "../utils/YouTubeExtractor";
 import { YouTubeVideoInfo } from "../types";
 
@@ -159,19 +159,48 @@ export function AudioManager(props: { transcriber: Transcriber }) {
         data: ArrayBuffer,
         mimeType: string,
     ) => {
-        const audioCTX = new AudioContext({
-            sampleRate: Constants.SAMPLING_RATE,
-        });
-        const blobUrl = URL.createObjectURL(
-            new Blob([data], { type: "audio/*" }),
-        );
-        const decoded = await audioCTX.decodeAudioData(data);
-        setAudioData({
-            buffer: decoded,
-            url: blobUrl,
-            source: AudioSource.URL,
-            mimeType: mimeType,
-        });
+        try {
+            console.log('Processing audio download:', {
+                dataSize: data.byteLength,
+                mimeType: mimeType
+            });
+
+            // Create audio context with proper sample rate
+            const audioCTX = new AudioContext({
+                sampleRate: Constants.SAMPLING_RATE,
+            });
+            
+            const blobUrl = URL.createObjectURL(
+                new Blob([data], { type: mimeType || "audio/*" }),
+            );
+            
+            const decoded = await audioCTX.decodeAudioData(data);
+            
+            console.log('Audio decoded successfully:', {
+                sampleRate: decoded.sampleRate,
+                length: decoded.length,
+                duration: decoded.duration,
+                channels: decoded.numberOfChannels
+            });
+            
+            // Validate decoded audio
+            if (decoded.length === 0) {
+                throw new Error('Decoded audio buffer is empty');
+            }
+            
+            setAudioData({
+                buffer: decoded,
+                url: blobUrl,
+                source: AudioSource.URL,
+                mimeType: mimeType,
+            });
+            
+            // Close the audio context to free resources
+            await audioCTX.close();
+        } catch (error) {
+            console.error('Error processing audio download:', error);
+            throw error;
+        }
     };
 
     const setAudioFromRecording = async (data: Blob) => {
@@ -282,8 +311,8 @@ export function AudioManager(props: { transcriber: Transcriber }) {
                     />
                     <VerticalBar />
                     <YouTubeTile
-                        icon={<YouTubeIcon />}
-                        text={"YouTube"}
+                        icon={<div className="w-7 h-7 flex items-center justify-center text-lg font-bold">YT</div>}
+                        text={"YouTube URL"}
                         onVideoSelect={(videoInfo) => {
                             props.transcriber.onInputChange();
                             setAudioFromYouTube(videoInfo);

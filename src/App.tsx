@@ -10,7 +10,7 @@ function App() {
             <div className='container flex flex-col justify-center items-center'>
                 <div className='flex flex-col items-center mb-8'>
                     <img 
-                        src='/Robot 550x700.png' 
+                        src='/Robot-550x700.png' 
                         alt='Johnny Whisper Robot' 
                         className='w-96 h-[30rem] mb-4 object-contain'
                     />

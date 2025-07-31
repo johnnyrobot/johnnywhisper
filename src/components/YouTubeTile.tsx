@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { YouTubeExtractor, YouTubeVideoInfo } from "../utils/YouTubeExtractor";
+import { YouTubeExtractor } from "../utils/YouTubeExtractor";
+import { YouTubeVideoInfo } from "../types";
 
 interface YouTubeTileProps {
     icon: React.ReactNode;
@@ -52,18 +53,16 @@ export function YouTubeTile({ icon, text, onVideoSelect, disabled = false }: You
             <button
                 onClick={() => setIsModalOpen(true)}
                 disabled={disabled}
-                className={`flex items-center justify-center rounded-lg p-2 text-sm font-medium transition-colors ${
-                    disabled
-                        ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                        : "bg-orange-50 text-orange-600 hover:bg-orange-100 hover:text-orange-700"
+                className={`flex items-center justify-center rounded-lg p-2 bg-blue text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200 ${
+                    disabled ? "opacity-50 cursor-not-allowed" : ""
                 }`}
             >
-                <div className="flex flex-col items-center space-y-1">
-                    <div className="w-8 h-8 flex items-center justify-center">
-                        {icon}
+                <div className="w-7 h-7">{icon}</div>
+                {text && (
+                    <div className="ml-2 break-text text-center text-md w-30">
+                        {text}
                     </div>
-                    <span className="text-xs">{text}</span>
-                </div>
+                )}
             </button>
 
             {isModalOpen && (

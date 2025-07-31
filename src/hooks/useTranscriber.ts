@@ -148,21 +148,57 @@ export function useTranscriber(): Transcriber {
                 setTranscript(undefined);
                 setIsBusy(true);
 
+                // Validate audio data
+                if (audioData.length === 0) {
+                    console.error('Audio buffer is empty');
+                    setIsBusy(false);
+                    return;
+                }
+
+                console.log('Audio info:', {
+                    sampleRate: audioData.sampleRate,
+                    length: audioData.length,
+                    duration: audioData.duration,
+                    channels: audioData.numberOfChannels
+                });
+
                 let audio;
                 if (audioData.numberOfChannels === 2) {
-                    const SCALING_FACTOR = Math.sqrt(2);
-
+                    // Convert stereo to mono by averaging the channels
                     let left = audioData.getChannelData(0);
                     let right = audioData.getChannelData(1);
 
-                    audio = new Float32Array(left.length);
+                    audio = new Float32Array(audioData.length);
                     for (let i = 0; i < audioData.length; ++i) {
-                        audio[i] = SCALING_FACTOR * (left[i] + right[i]) / 2;
+                        audio[i] = (left[i] + right[i]) / 2;
                     }
                 } else {
-                    // If the audio is not stereo, we can just use the first channel:
+                    // If the audio is mono, use the first channel
                     audio = audioData.getChannelData(0);
                 }
+
+                // Validate the processed audio
+                if (audio.length === 0) {
+                    console.error('Processed audio is empty');
+                    setIsBusy(false);
+                    return;
+                }
+
+                // Check if audio contains valid data (not all zeros or NaN)
+                const hasValidData = audio.some(sample => !isNaN(sample) && sample !== 0);
+                if (!hasValidData) {
+                    console.error('Audio contains no valid data');
+                    setIsBusy(false);
+                    return;
+                }
+
+                console.log('Sending audio to worker:', {
+                    audioLength: audio.length,
+                    sampleRate: audioData.sampleRate,
+                    model,
+                    multilingual,
+                    quantized
+                });
 
                 webWorker.postMessage({
                     audio,

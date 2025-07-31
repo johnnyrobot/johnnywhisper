@@ -22,7 +22,7 @@ export function getVideoId(url: string): string | null {
 }
 
 export class YouTubeExtractor {
-    private static readonly BACKEND_BASE_URL = 'http://localhost:3001/api/youtube';
+    private static readonly BACKEND_BASE_URL = '/api/youtube';
     
     /**
      * Extract video ID from various YouTube URL formats
@@ -55,7 +55,7 @@ export class YouTubeExtractor {
      */
     static async isBackendAvailable(): Promise<boolean> {
         try {
-            const response = await fetch(`http://localhost:3001/api/health`, {
+            const response = await fetch(`/api/health`, {
                 method: 'GET',
                 signal: AbortSignal.timeout(5000) // 5 second timeout
             });
@@ -154,7 +154,7 @@ export class YouTubeExtractor {
             }
 
             // Return the download URL for the extracted audio
-            return `http://localhost:3001${extractionResult.downloadUrl}`;
+            return extractionResult.downloadUrl;
         } catch (error) {
             console.error('Error extracting YouTube audio:', error instanceof Error ? error.message : String(error));
             console.error('Full error details:', error);
