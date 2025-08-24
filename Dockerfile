@@ -1,17 +1,13 @@
-# Use Node.js 18 with Alpine for smaller image size
-FROM node:20-alpine
+# Stage 1: Build the frontend
+FROM node:20-alpine AS builder
 
-# Install FFmpeg (required for YouTube audio extraction)
-RUN apk add --no-cache ffmpeg
-
-# Set working directory
 WORKDIR /app
 
-# Copy frontend package files and install ALL dependencies (including dev deps for build)
+# Copy frontend package files and install dependencies
 COPY package*.json ./
 RUN npm install
 
-# Copy frontend source code
+# Copy frontend source code and build
 COPY src/ ./src/
 COPY public/ ./public/
 COPY index.html ./
@@ -24,21 +20,27 @@ COPY postcss.config.cjs ./
 COPY .eslintrc ./
 COPY .eslintignore ./
 COPY .prettierrc ./
+RUN npm run build
 
-# Build the frontend with verbose output
-RUN npm run build --verbose
+# Stage 2: Create the production image
+FROM node:20-alpine
 
-# Clean up frontend node_modules to save space (keep only dist)
+# Install FFmpeg
+RUN apk add --no-cache ffmpeg
 
+WORKDIR /app
 
-# Copy server package files and install backend dependencies
+# Copy server package files and install production dependencies
 COPY server/package*.json ./server/
 RUN cd server && npm install --only=production
 
 # Copy server source code
 COPY server/ ./server/
 
-# Create uploads directory for temporary files
+# Copy built frontend from the builder stage
+COPY --from=builder /app/dist ./dist
+
+# Create uploads directory
 RUN mkdir -p /app/server/uploads
 
 # Set production environment
