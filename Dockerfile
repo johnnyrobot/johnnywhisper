@@ -29,7 +29,7 @@ COPY .prettierrc ./
 RUN npm run build --verbose
 
 # Clean up frontend node_modules to save space (keep only dist)
-RUN rm -rf node_modules package*.json src public index.html vite.config.ts tsconfig*.json tailwind.config.* postcss.config.cjs .eslintrc .eslintignore .prettierrc
+
 
 # Copy server package files and install backend dependencies
 COPY server/package*.json ./server/
