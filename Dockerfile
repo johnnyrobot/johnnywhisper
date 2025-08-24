@@ -1,5 +1,5 @@
 # Use Node.js 18 with Alpine for smaller image size
-FROM node:18-alpine
+FROM node:20-alpine
 
 # Install FFmpeg (required for YouTube audio extraction)
 RUN apk add --no-cache ffmpeg
