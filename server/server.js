@@ -51,19 +51,27 @@ function getVideoId(url) {
 
 // Get video info
 app.post('/api/youtube/info', async (req, res) => {
+    console.log('Received request for /api/youtube/info');
+    console.log('Request body:', req.body);
     try {
         const { url } = req.body;
         
         if (!url) {
+            console.log('URL is missing from the request body');
             return res.status(400).json({ error: 'URL is required' });
         }
         
+        console.log('Validating YouTube URL:', url);
         if (!isValidYouTubeUrl(url)) {
+            console.log('Invalid YouTube URL:', url);
             return res.status(400).json({ error: 'Invalid YouTube URL' });
         }
         
+        console.log('Fetching video info for:', url);
         const info = await ytdl.getInfo(url);
         const videoDetails = info.videoDetails;
+        
+        console.log('Successfully fetched video info for:', videoDetails.title);
         
         res.json({
             videoId: videoDetails.videoId,
