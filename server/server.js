@@ -1,23 +1,10 @@
 const express = require('express');
 const cors = require('cors');
-const ytdl = require('@distube/ytdl-core');
+const ytdl = require('ytdl-core-discord');
 const ffmpeg = require('fluent-ffmpeg');
 const fs = require('fs-extra');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
-const os = require('os');
-
-// Configure FFmpeg path
-const ffmpegPath = path.join(os.homedir(), 'AppData', 'Local', 'Microsoft', 'WinGet', 'Packages', 'Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe', 'ffmpeg-7.1.1-full_build', 'bin', 'ffmpeg.exe');
-const ffprobePath = path.join(os.homedir(), 'AppData', 'Local', 'Microsoft', 'WinGet', 'Packages', 'Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe', 'ffmpeg-7.1.1-full_build', 'bin', 'ffprobe.exe');
-
-if (fs.existsSync(ffmpegPath)) {
-    ffmpeg.setFfmpegPath(ffmpegPath);
-    ffmpeg.setFfprobePath(ffprobePath);
-    console.log('FFmpeg configured at:', ffmpegPath);
-} else {
-    console.warn('FFmpeg not found at expected path:', ffmpegPath);
-}
 
 const app = express();
 const PORT = process.env.PORT || 3001;
