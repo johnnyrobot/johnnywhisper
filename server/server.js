@@ -1,11 +1,16 @@
 const express = require('express');
 const cors = require('cors');
-const ytdl = require('ytdl-core-discord');
+const ytdl = require('@distube/ytdl-core');
 const ffmpeg = require('fluent-ffmpeg');
 const fs = require('fs-extra');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 
+// Use stable browser-like headers to improve reliability with YouTube
+const REQUEST_HEADERS = {
+    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+    'accept-language': 'en-US,en;q=0.9',
+};
 const app = express();
 const PORT = process.env.PORT || 3001;
 
@@ -68,7 +73,7 @@ app.post('/api/youtube/info', async (req, res) => {
         }
         
         console.log('Fetching video info for:', url);
-        const info = await ytdl.getInfo(url);
+        const info = await ytdl.getInfo(url, { requestOptions: { headers: REQUEST_HEADERS } });
         const videoDetails = info.videoDetails;
         
         console.log('Successfully fetched video info for:', videoDetails.title);
@@ -125,7 +130,8 @@ app.post('/api/youtube/extract-audio', async (req, res) => {
         const extractionPromise = new Promise((resolve, reject) => {
             const stream = ytdl(url, {
                 quality: 'highestaudio',
-                filter: 'audioonly'
+                filter: 'audioonly',
+                requestOptions: { headers: REQUEST_HEADERS }
             });
             
             ffmpeg(stream)

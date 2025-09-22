@@ -12,166 +12,83 @@ This application allows you to transcribe audio from your microphone, local file
 - **Browser-based**: No data leaves your device for privacy
 - **Fast Processing**: Powered by Transformers.js
 
-## System Requirements
+## Docker Installation (Recommended)
 
-- **Node.js**: v18.0.0 or later
-- **FFmpeg**: Required for YouTube audio extraction
-- **Modern Browser**: Chrome, Firefox, Safari, or Edge (latest versions)
-- **RAM**: At least 4GB recommended for optimal performance
-- **Storage**: ~500MB for dependencies and models
+Run the entire app (frontend + backend + FFmpeg) with Docker. No local Node or FFmpeg installs required.
 
-## Installation Instructions
+### Prerequisites
+- Install Docker Desktop: https://www.docker.com/products/docker-desktop/
+- Ensure Docker is running
 
-### Windows Installation
-
-#### Step 1: Install Node.js
-1. Download Node.js from [nodejs.org](https://nodejs.org/)
-2. Choose the LTS version (recommended)
-3. Run the installer and follow the setup wizard
-4. Verify installation by opening Command Prompt or PowerShell and running:
-   ```cmd
-   node --version
-   npm --version
-   ```
-
-#### Step 2: Install FFmpeg
-Choose one of the following methods:
-
-**Method A: Using winget (Recommended)**
-```cmd
-winget install Gyan.FFmpeg.Full
-```
-
-**Method B: Manual Installation**
-1. Download FFmpeg from [ffmpeg.org](https://ffmpeg.org/download.html#build-windows)
-2. Extract the archive to `C:\ffmpeg`
-3. Add `C:\ffmpeg\bin` to your system PATH:
-   - Press `Win + R`, type `sysdm.cpl`, press Enter
-   - Click "Environment Variables"
-   - Under "System Variables", find and select "Path", click "Edit"
-   - Click "New" and add `C:\ffmpeg\bin`
-   - Click "OK" on all dialogs
-4. Verify installation:
-   ```cmd
-   ffmpeg -version
-   ```
-
-#### Step 3: Install Project Dependencies
-1. Open Command Prompt or PowerShell as Administrator
-2. Navigate to the project directory:
-   ```cmd
-   cd path\to\johnnywhisper
-   ```
-3. Install frontend dependencies:
-   ```cmd
-   npm install
-   ```
-4. Navigate to the server directory and install backend dependencies:
-   ```cmd
-   cd server
-   npm install
-   cd ..
-   ```
-
-### macOS Installation
-
-#### Step 1: Install Node.js
-Choose one of the following methods:
-
-**Method A: Using Homebrew (Recommended)**
+### Build and Run
 ```bash
-# Install Homebrew if you don't have it
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-# Install Node.js
-brew install node
-```
-
-**Method B: Direct Download**
-1. Download Node.js from [nodejs.org](https://nodejs.org/)
-2. Choose the LTS version for macOS
-3. Run the installer package
-4. Verify installation:
-   ```bash
-   node --version
-   npm --version
-   ```
-
-#### Step 2: Install FFmpeg
-```bash
-# Using Homebrew
-brew install ffmpeg
-
-# Verify installation
-ffmpeg -version
-```
-
-#### Step 3: Install Project Dependencies
-1. Open Terminal
-2. Navigate to the project directory:
-   ```bash
-   cd path/to/johnnywhisper
-   ```
-3. Install frontend dependencies:
-   ```bash
-   npm install
-   ```
-4. Navigate to the server directory and install backend dependencies:
-   ```bash
-   cd server
-   npm install
-   cd ..
-   ```
-
-## Running the Application
-
-Johnny Whisper consists of two components that must both be running:
-1. **Backend Server**: Handles YouTube audio extraction
-2. **Frontend Application**: The main web interface
-
-### Starting the Application
-
-#### Option 1: Quick Start (Recommended)
-From the project root directory:
-
-**Windows:**
-```cmd
-# Start both frontend and backend in one command
-npm start
-```
-
-**macOS:**
-```bash
-# Start both frontend and backend in one command
-npm start
+# From the project root
+docker compose up -d --build
 ```
 
 This will:
-- Build the frontend application
-- Start the backend server on `http://localhost:3001`
-- The built frontend will be served by the backend
+- Build the frontend with Vite
+- Install backend dependencies
+- Install FFmpeg in the image
+- Start the server on http://localhost:3001
 
-#### Option 2: Development Mode (For Development)
-If you want to run in development mode with hot reloading:
+Open the app:
+- http://localhost:3001
 
-**Terminal 1 - Start Backend Server:**
+### Stop and Clean Up
 ```bash
-cd server
-npm start
+docker compose down
 ```
-The server will run on `http://localhost:3001`
 
-**Terminal 2 - Start Frontend Development Server:**
+### View Logs
 ```bash
-# From project root
-npm run dev
+docker compose logs -f
 ```
-The frontend will run on `http://localhost:5173`
 
-### Accessing the Application
+### Update to Latest Code
+```bash
+git pull
+docker compose up -d --build
+```
 
-1. **Production Mode**: Open your browser to `http://localhost:3001`
-2. **Development Mode**: Open your browser to `http://localhost:5173`
+### Data and Volumes
+- Extracted files are stored in the container at `/app/server/uploads`.
+- A volume is mapped in `docker-compose.yml` so files appear on your host at `server/uploads/`.
+
+### Environment
+- Default environment is `NODE_ENV=production` (set in `docker-compose.yml`).
+- The container exposes port `3001` and serves the built frontend and API under `/api/*`.
+
+> Legacy OS-specific installation steps have been deprecated in favor of Docker.
+
+## Requirements
+
+- **Docker Desktop**: Latest stable version
+- **Modern Browser**: Chrome, Firefox, Safari, or Edge (latest versions)
+- **RAM**: At least 4GB recommended for optimal performance
+
+## Running the Application
+
+### Start
+```bash
+docker compose up -d --build
+```
+Then open `http://localhost:3001` in your browser.
+
+### Stop
+```bash
+docker compose down
+```
+
+### Rebuild after code changes
+```bash
+docker compose up -d --build
+```
+
+### View server logs
+```bash
+docker compose logs -f
+```
 
 ## Usage Guide
 
@@ -196,8 +113,9 @@ The frontend will run on `http://localhost:5173`
 ### Common Issues
 
 #### "FFmpeg not found" Error
-- **Windows**: Ensure FFmpeg is in your PATH. Restart Command Prompt after installation.
-- **macOS**: Try reinstalling with `brew reinstall ffmpeg`
+This image installs FFmpeg automatically. If you see this error:
+- Ensure you rebuilt the image: `docker compose up -d --build`
+- Check logs for startup errors: `docker compose logs -f`
 
 #### Port Already in Use
 If you see "Port 3001 already in use":
@@ -249,11 +167,11 @@ If the browser becomes unresponsive:
 johnnywhisper/
 ├── src/                 # Frontend React application
 ├── server/              # Backend Express server
-│   ├── server.js       # Main server file
-│   └── package.json    # Backend dependencies
-├── public/             # Static assets
-├── dist/               # Built frontend (generated)
-└── package.json        # Frontend dependencies
+│   └── server.js        # Main server file
+├── public/              # Static assets
+├── dist/                # Built frontend (generated by Docker build)
+├── Dockerfile           # Multi-stage build: frontend + server + FFmpeg
+└── docker-compose.yml   # Runs the app at http://localhost:3001
 ```
 
 ## License
@@ -264,8 +182,8 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 If you encounter issues:
 1. Check the troubleshooting section above
-2. Ensure all prerequisites are properly installed
-3. Verify both frontend and backend servers are running
+2. Ensure Docker Desktop is running
+3. Verify the container is healthy with `docker compose ps` and view logs with `docker compose logs -f`
 4. Check browser console for error messages
 
 For additional help, please refer to the project documentation or create an issue in the project repository.

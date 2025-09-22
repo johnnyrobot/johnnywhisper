@@ -263,22 +263,16 @@ export function AudioManager(props: { transcriber: Transcriber }) {
         try {
             setAudioData(undefined);
 
-            const downloadUrl = `http://localhost:3001/api/youtube/download/${videoInfo.videoId}`;
+            // Download audio via backend and get both the buffer and a temporary server URL
+            const { buffer, downloadUrl } = await YouTubeExtractor.downloadAudio(videoInfo, setProgress);
 
-            // We still need to fetch the audio data for transcription, but we can stream it for playback.
-            const audioBuffer = await YouTubeExtractor.downloadAudio(videoInfo, setProgress);
-            const audioCTX = new AudioContext({
-                sampleRate: Constants.SAMPLING_RATE,
-            });
-            const decoded = await audioCTX.decodeAudioData(audioBuffer);
+            // Use our existing handler to generate a Blob URL for robust playback
+            await setAudioFromDownload(buffer, "audio/wav");
+
+            // Optionally keep the backend URL for reference or debugging
+            console.debug("YouTube backend download URL:", downloadUrl);
 
             setProgress(undefined);
-            setAudioData({
-                buffer: decoded,
-                url: downloadUrl, // Use the direct download URL for the player
-                source: AudioSource.YOUTUBE,
-                mimeType: "audio/wav",
-            });
         } catch (error) {
             console.error("Error processing YouTube audio:", error instanceof Error ? error.message : String(error));
             console.error("Full error details:", error);

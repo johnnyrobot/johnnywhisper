@@ -165,7 +165,7 @@ export class YouTubeExtractor {
     /**
      * Download audio from the backend service
      */
-    static async downloadAudio(videoInfo: YouTubeVideoInfo, onProgress?: (progress: number) => void): Promise<ArrayBuffer> {
+    static async downloadAudio(videoInfo: YouTubeVideoInfo, onProgress?: (progress: number) => void): Promise<{ buffer: ArrayBuffer, downloadUrl: string }> {
         try {
             // First extract the audio and get download URL
             const downloadUrl = await this.extractAudio(`https://www.youtube.com/watch?v=${videoInfo.videoId}`, (progress) => {
@@ -235,7 +235,7 @@ export class YouTubeExtractor {
                 onProgress(1.0); // Complete
             }
 
-            return result.buffer;
+            return { buffer: result.buffer, downloadUrl };
         } catch (error) {
             console.error('Error downloading YouTube audio:', error instanceof Error ? error.message : String(error));
             console.error('Full error details:', error);
