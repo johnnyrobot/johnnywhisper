@@ -1,8 +1,13 @@
-# Use Node.js 18 with Alpine for smaller image size
-FROM node:18-alpine
+# Use Node.js 18 (full version for better compatibility)
+FROM node:18
 
-# Install FFmpeg (required for YouTube audio extraction)
-RUN apk add --no-cache ffmpeg
+# Install FFmpeg and other system dependencies
+RUN apt-get update && apt-get install -y \
+    ffmpeg \
+    python3 \
+    make \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /app
@@ -25,8 +30,8 @@ COPY .eslintrc ./
 COPY .eslintignore ./
 COPY .prettierrc ./
 
-# Build the frontend with verbose output
-RUN npm run build --verbose
+# Build the frontend
+RUN npm run build
 
 # Clean up frontend node_modules to save space (keep only dist)
 RUN rm -rf node_modules package*.json src public index.html vite.config.ts tsconfig*.json tailwind.config.* postcss.config.cjs .eslintrc .eslintignore .prettierrc
