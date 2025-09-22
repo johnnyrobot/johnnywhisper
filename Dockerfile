@@ -25,8 +25,8 @@ RUN npm run build
 # Stage 2: Create the production image
 FROM node:20-alpine
 
-# Install FFmpeg
-RUN apk add --no-cache ffmpeg
+# Install FFmpeg and other system dependencies
+RUN apk add --no-cache ffmpeg python3 make g++
 
 WORKDIR /app
 
